@@ -15,6 +15,6 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand, TaskD
 
     public async Task<TaskDto> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
     {
-        return await _repository.UpdateAsync(request.Id, request.Title, request.Description, request.Status, cancellationToken);
+        return await _repository.UpdateAsync(request.Id, request.Title, request.Description, request.Status, request.Priority, request.DueDate, cancellationToken);
     }
 }

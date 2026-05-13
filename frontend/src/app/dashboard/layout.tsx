@@ -8,12 +8,13 @@ import {
   BookOpen,
   Cpu,
   PenTool,
-  Settings,
   LogOut,
   Menu,
   X,
   Search,
-  Bell
+  Bell,
+  CheckSquare,
+  BookMarked
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,8 @@ import { SearchProvider, useSearch } from '@/context/SearchContext';
 const navItems = [
   { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Teknik Notlar', href: '/dashboard/notes', icon: BookOpen },
+  { name: 'Görevler', href: '/dashboard/tasks', icon: CheckSquare },
+  { name: 'Günlük', href: '/dashboard/journal', icon: BookMarked },
   { name: 'Projeler', href: '/dashboard/projects', icon: Cpu },
   { name: 'Blog Yönetimi', href: '/dashboard/blog', icon: PenTool },
 ];
@@ -76,7 +79,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
 
         <nav className="mt-8 px-4 flex-1 space-y-2">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href);
             return (
               <Link key={item.name} href={item.href}>
                 <div className={cn(

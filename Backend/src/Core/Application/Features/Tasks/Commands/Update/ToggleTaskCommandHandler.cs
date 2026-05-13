@@ -18,6 +18,6 @@ public class ToggleTaskCommandHandler : IRequestHandler<ToggleTaskCommand, TaskD
         var task = await _repository.GetByIdAsync(request.Id, cancellationToken);
         var newStatus = task.Status == "Done" ? "Todo" : "Done";
 
-        return await _repository.UpdateAsync(request.Id, task.Title, task.Description, newStatus, cancellationToken);
+        return await _repository.UpdateAsync(request.Id, task.Title, task.Description, newStatus, task.Priority, task.DueDate, cancellationToken);
     }
 }

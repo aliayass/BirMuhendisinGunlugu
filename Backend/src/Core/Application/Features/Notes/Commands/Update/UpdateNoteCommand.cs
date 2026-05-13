@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BirMuhendisinGunlugu.Application.Features.Notes.Commands.Update;
 
-public record UpdateNoteCommand(Guid Id, string Title, string Content, string UserId) : IRequest<NoteDto>;
+public record UpdateNoteCommand(Guid Id, string Title, string Content, string UserId, string Tags = "", string Category = "") : IRequest<NoteDto>;
