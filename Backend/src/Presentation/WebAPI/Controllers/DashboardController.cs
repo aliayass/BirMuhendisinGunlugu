@@ -29,4 +29,16 @@ public class DashboardController : ControllerBase
         var result = await _mediator.Send(new GetDashboardSummaryQuery(userId));
         return Ok(result);
     }
+
+    /// <summary>Dashboard chart verilerini getirir (7, 14 veya 30 gün)</summary>
+    [HttpGet("charts")]
+    [ProducesResponseType(typeof(DashboardChartsDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCharts([FromQuery] int days = 7)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var result = await _mediator.Send(new GetDashboardChartsQuery(userId, days));
+        return Ok(result);
+    }
 }

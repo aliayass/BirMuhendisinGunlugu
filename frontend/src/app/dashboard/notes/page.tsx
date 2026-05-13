@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { useSearch } from '@/context/SearchContext';
 
 interface Note {
   id: string;
@@ -30,54 +32,62 @@ export default function NotesPage() {
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newNoteContent, setNewNoteContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { searchQuery } = useSearch();
 
   const fetchNotes = async () => {
     try {
       const response = await api.get('/notes');
       setNotes(response.data);
-    } catch (error) {
-      console.error('Notlar getirilirken hata:', error);
+    } catch {
+      toast.error('Notlar yüklenemedi.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+  useEffect(() => { fetchNotes(); }, []);
 
   const handleCreateNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNoteTitle || !newNoteContent) return;
+    const title = newNoteTitle.trim();
+    const content = newNoteContent.trim();
+    if (!title || !content) return;
 
     setIsSubmitting(true);
     try {
-      await api.post('/notes', {
-        title: newNoteTitle,
-        content: newNoteContent,
-        parentId: null
-      });
+      await api.post('/notes', { title, content, parentId: null });
+      toast.success('Not kaydedildi!');
       setIsNoteModalOpen(false);
       setNewNoteTitle('');
       setNewNoteContent('');
       await fetchNotes();
-    } catch (error) {
-      console.error('Not oluşturulurken hata:', error);
+    } catch {
+      toast.error('Not kaydedilemedi.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!window.confirm('Bu notu silmek istediğinize emin misiniz?')) return;
-
-    try {
-      await api.delete(`/notes/${noteId}`);
-      setNotes(notes.filter(n => n.id !== noteId));
-    } catch (error) {
-      console.error('Not silinirken hata:', error);
-    }
+    toast('Bu notu silmek istediğinize emin misiniz?', {
+      action: {
+        label: 'Evet, Sil',
+        onClick: async () => {
+          try {
+            await api.delete(`/notes/${noteId}`);
+            setNotes(prev => prev.filter(n => n.id !== noteId));
+            toast.success('Not silindi.');
+          } catch {
+            toast.error('Not silinemedi.');
+          }
+        },
+      },
+      cancel: { label: 'Vazgeç', onClick: () => {} },
+    });
   };
+
+  const q = searchQuery.toLowerCase();
+  const filteredNotes = q ? notes.filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q)) : notes;
 
   if (loading) {
     return (
@@ -92,7 +102,9 @@ export default function NotesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight">Teknik Notlar</h1>
-          <p className="text-muted-foreground">Öğrendiklerinizi, dökümanları ve teknik detayları not alın.</p>
+          <p className="text-muted-foreground">
+            {searchQuery ? `"${searchQuery}" için ${filteredNotes.length} sonuç` : `${notes.length} not`}
+          </p>
         </div>
         <Button 
           onClick={() => setIsNoteModalOpen(true)}
@@ -103,13 +115,15 @@ export default function NotesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {notes.length === 0 ? (
+        {filteredNotes.length === 0 ? (
           <div className="col-span-full text-center py-12 glass rounded-3xl border border-white/5">
             <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">Henüz hiç not eklememişsiniz.</p>
+            <p className="text-muted-foreground">
+              {searchQuery ? 'Aramayla eşleşen not bulunamadı.' : 'Henüz hiç not eklemediniz.'}
+            </p>
           </div>
         ) : (
-          notes.map((note) => (
+          filteredNotes.map((note) => (
             <motion.div 
               key={note.id}
               layout
@@ -189,7 +203,7 @@ export default function NotesPage() {
 
                 <Button 
                   type="submit" 
-                  disabled={isSubmitting || !newNoteTitle || !newNoteContent}
+                  disabled={isSubmitting || !newNoteTitle.trim() || !newNoteContent.trim()}
                   className="w-full h-12 rounded-xl bg-primary hover:bg-primary-dark mt-4 shrink-0"
                 >
                   {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kaydet'}
