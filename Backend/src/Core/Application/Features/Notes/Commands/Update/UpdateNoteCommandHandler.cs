@@ -9,5 +9,5 @@ public class UpdateNoteCommandHandler : IRequestHandler<UpdateNoteCommand, NoteD
     private readonly INoteRepository _noteRepository;
     public UpdateNoteCommandHandler(INoteRepository noteRepository) => _noteRepository = noteRepository;
     public Task<NoteDto> Handle(UpdateNoteCommand request, CancellationToken ct)
-        => _noteRepository.UpdateAsync(request.Id, request.Title, request.Content, request.UserId, ct);
+        => _noteRepository.UpdateAsync(request.Id, request.Title, request.Content, request.UserId, request.Tags, request.Category, ct);
 }

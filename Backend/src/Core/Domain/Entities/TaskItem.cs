@@ -7,6 +7,8 @@ public class TaskItem : BaseEntity
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = "Todo"; // Todo, InProgress, Done
+    public string Priority { get; set; } = "Medium"; // Low, Medium, High
+    public DateTime? DueDate { get; set; }
     public Guid ProjectId { get; set; }
     public Project Project { get; set; } = null!;
 }

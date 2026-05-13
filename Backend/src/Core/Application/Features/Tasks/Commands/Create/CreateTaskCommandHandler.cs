@@ -9,5 +9,5 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskD
     private readonly ITaskRepository _taskRepository;
     public CreateTaskCommandHandler(ITaskRepository taskRepository) => _taskRepository = taskRepository;
     public Task<TaskDto> Handle(CreateTaskCommand request, CancellationToken ct)
-        => _taskRepository.CreateAsync(request.Title, request.Description, request.ProjectId, ct);
+        => _taskRepository.CreateAsync(request.Title, request.Description, request.ProjectId, request.Priority, request.DueDate, ct);
 }
