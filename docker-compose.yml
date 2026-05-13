@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: bmg_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: bmg_api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=ep-small-surf-alzl72zg.c-3.eu-central-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_OSKgL9d7zGmV;SSL Mode=Require;Trust Server Certificate=true;
+      - Jwt__SecretKey=BirMuhendisinGunlugu_SuperSecretKey_2024_MinimumLength32Chars!
+      - Jwt__Issuer=BirMuhendisinGunlugu.API
+      - Jwt__Audience=BirMuhendisinGunlugu.Client
+      - Jwt__ExpiresInMinutes=60
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+

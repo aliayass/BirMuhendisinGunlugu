@@ -1,0 +1,11 @@
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\bin\Debug\net10.0\BirMuhendisinGunlugu.Domain.deps.json
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\bin\Debug\net10.0\BirMuhendisinGunlugu.Domain.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\bin\Debug\net10.0\BirMuhendisinGunlugu.Domain.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.AssemblyInfoInputs.cache
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.AssemblyInfo.cs
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\refint\BirMuhendisinGunlugu.Domain.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\BirMuhendisinGunlugu.Domain.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Core\Domain\obj\Debug\net10.0\ref\BirMuhendisinGunlugu.Domain.dll

@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/" />
+  <Folder Name="/src/Core/Application/">
+    <Project Path="src/Core/Application/BirMuhendisinGunlugu.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/Core/Domain/">
+    <Project Path="src/Core/Domain/BirMuhendisinGunlugu.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/" />
+  <Folder Name="/src/Infrastructure/Infrastructure/">
+    <Project Path="src/Infrastructure/Infrastructure/BirMuhendisinGunlugu.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/Persistence/">
+    <Project Path="src/Infrastructure/Persistence/BirMuhendisinGunlugu.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/" />
+  <Folder Name="/src/Presentation/WebAPI/">
+    <Project Path="src/Presentation/WebAPI/BirMuhendisinGunlugu.WebAPI.csproj" />
+  </Folder>
+</Solution>

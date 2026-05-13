@@ -1,0 +1,21 @@
+# .NET (C#)
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Node (Frontend)
+node_modules/
+.next/
+dist/
+build/
+.env*.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/

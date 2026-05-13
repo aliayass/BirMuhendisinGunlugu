@@ -1,0 +1,17 @@
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.deps.json
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Application.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Domain.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Application.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\bin\Debug\net8.0\BirMuhendisinGunlugu.Domain.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.AssemblyInfo.cs
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhen.485C8856.Up2Date
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\refint\BirMuhendisinGunlugu.Infrastructure.dll
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\BirMuhendisinGunlugu.Infrastructure.pdb
+C:\Users\ali65\.gemini\antigravity\scratch\BirMuhendisinGunlugu\Backend\src\Infrastructure\Infrastructure\obj\Debug\net8.0\ref\BirMuhendisinGunlugu.Infrastructure.dll
