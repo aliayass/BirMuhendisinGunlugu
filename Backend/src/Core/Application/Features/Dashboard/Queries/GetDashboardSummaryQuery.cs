@@ -31,12 +31,25 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
         var allProjects = await _projectRepository.GetAllByUserAsync(request.UserId, cancellationToken);
         var allTasks = await _taskRepository.GetAllByUserAsync(request.UserId, cancellationToken);
 
-        var totalNotes = allNotes.Count();
+        var todayUtc = DateTime.UtcNow.Date;
+        var weekAgoUtc = todayUtc.AddDays(-7);
+
+        var totalNotes = allNotes.Count;
         var completedTasks = allTasks.Count(t => t.Status == "Done");
-        var activeProjects = allProjects.Count();
-        
-        // Blog kısmı statik "0" kalacak (kullanıcı isteği doğrultusunda)
-        var blogReadCount = 0;
+        var tasksPending = allTasks.Count(t => t.Status != "Done");
+        var activeProjects = allProjects.Count;
+
+        var notesThisWeek = allNotes.Count(n => n.CreatedAt >= weekAgoUtc);
+
+        var totalTasks = allTasks.Count;
+        var completionRate = totalTasks > 0
+            ? (int)Math.Round(completedTasks * 100.0 / totalTasks)
+            : 0;
+
+        var tasksDoneToday = allTasks.Count(t =>
+            t.Status == "Done" &&
+            t.UpdatedAt.HasValue &&
+            t.UpdatedAt.Value.Date == todayUtc);
 
         var recentNotes = allNotes
             .OrderByDescending(n => n.CreatedAt)
@@ -53,9 +66,13 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
             totalNotes,
             completedTasks,
             activeProjects,
-            blogReadCount,
+            BlogReadCount: 0,
             recentNotes,
-            pendingTasks
+            pendingTasks,
+            tasksPending,
+            notesThisWeek,
+            completionRate,
+            tasksDoneToday
         );
     }
 }

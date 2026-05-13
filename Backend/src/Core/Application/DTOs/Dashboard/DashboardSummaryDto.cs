@@ -9,5 +9,19 @@ public record DashboardSummaryDto(
     int ActiveProjects,
     int BlogReadCount,
     List<NoteDto> RecentNotes,
-    List<TaskDto> PendingTasks
+    List<TaskDto> PendingTasks,
+    // Faz 2 metrikleri
+    int TasksPending,
+    int NotesThisWeek,
+    int CompletionRate,
+    int TasksDoneToday
+);
+
+public record DashboardChartPointDto(string Date, int Count);
+
+public record DashboardChartsDto(
+    List<DashboardChartPointDto> NotesByDay,
+    List<DashboardChartPointDto> TasksCreatedByDay,
+    List<DashboardChartPointDto> TasksCompletedByDay,
+    int Days
 );

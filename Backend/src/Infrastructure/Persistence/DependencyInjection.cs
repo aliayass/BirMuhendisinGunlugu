@@ -1,5 +1,6 @@
 using BirMuhendisinGunlugu.Application.Interfaces.Auth;
 using BirMuhendisinGunlugu.Application.Interfaces.Blog;
+using BirMuhendisinGunlugu.Application.Interfaces.Dashboard;
 using BirMuhendisinGunlugu.Application.Interfaces.Dictionary;
 using BirMuhendisinGunlugu.Application.Interfaces.Journals;
 using BirMuhendisinGunlugu.Application.Interfaces.Notes;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<IDictionaryRepository, DictionaryRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         return services;
     }
