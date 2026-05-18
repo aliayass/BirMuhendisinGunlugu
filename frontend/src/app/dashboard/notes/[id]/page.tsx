@@ -1,27 +1,31 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { SyntaxHighlighterProps } from 'react-syntax-highlighter';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/prism';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   Eye,
   Edit3,
   Save,
   Pin,
-  Tag,
   Loader2,
   Check,
+  Sparkles,
+  BookMarked,
+  X,
+  Wand2,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, isSameDay, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 interface Note {
@@ -33,6 +37,21 @@ interface Note {
   category: string;
   createdAt: string;
   updatedAt: string | null;
+}
+
+interface JournalEntry {
+  id: string;
+  title: string;
+  content: string;
+  mood: string;
+  createdAt: string;
+}
+
+interface DictionaryTerm {
+  id: string;
+  term: string;
+  definition: string;
+  category: string;
 }
 
 const CATEGORIES = ['Genel', 'Mimari', 'Algoritma', 'DevOps', 'Frontend', 'Backend', 'Veritabanı', 'Güvenlik'];
@@ -53,6 +72,14 @@ export default function NoteEditorPage() {
   const [loading, setLoading] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
 
+  const [suggestingTags, setSuggestingTags] = useState(false);
+  const [aiDrawer, setAiDrawer] = useState<{ open: boolean; title: string; content: string; loading: boolean }>({
+    open: false, title: '', content: '', loading: false,
+  });
+
+  const [sameDayJournals, setSameDayJournals] = useState<JournalEntry[]>([]);
+  const [dictTerms, setDictTerms] = useState<DictionaryTerm[]>([]);
+
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchNote = useCallback(async () => {
@@ -66,6 +93,20 @@ export default function NoteEditorPage() {
       setTags(found.tags ?? '');
       setCategory(found.category ?? 'Genel');
       setIsPinned(found.isPinned ?? false);
+
+      // Fetch same-day journals
+      try {
+        const jres = await api.get('/journals');
+        const noteDate = parseISO(found.createdAt);
+        const matches = (jres.data as JournalEntry[]).filter(j => isSameDay(parseISO(j.createdAt), noteDate));
+        setSameDayJournals(matches);
+      } catch { /* silent */ }
+
+      // Fetch dictionary terms for auto-link
+      try {
+        const dres = await api.get('/dictionary');
+        setDictTerms(dres.data);
+      } catch { /* silent */ }
     } catch {
       toast.error('Not yüklenemedi.');
       router.push('/dashboard/notes');
@@ -91,7 +132,6 @@ export default function NoteEditorPage() {
     }
   }, [id, title, content, tags, category]);
 
-  // Auto-save with debounce
   useEffect(() => {
     if (!isDirty) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -109,6 +149,73 @@ export default function NoteEditorPage() {
     } catch {
       toast.error('Güncelleme başarısız.');
     }
+  };
+
+  const handleSuggestTags = async () => {
+    if (!content.trim()) { toast.error('Önce içerik yazmalısın.'); return; }
+    setSuggestingTags(true);
+    try {
+      const res = await api.post('/ai/suggest-tags', { content });
+      const suggested: string = res.data.result ?? '';
+      const newTagSet = new Set(
+        [...tags.split(','), ...suggested.split(',')]
+          .map(t => t.trim())
+          .filter(Boolean)
+      );
+      setTags(Array.from(newTagSet).join(', '));
+      setIsDirty(true);
+      toast.success('AI etiketleri eklendi.');
+    } catch {
+      toast.error('AI etiketleri alınamadı.');
+    } finally {
+      setSuggestingTags(false);
+    }
+  };
+
+  const handleExplainCode = async (code: string, language: string) => {
+    setAiDrawer({ open: true, title: `Kod açıklaması (${language || 'metin'})`, content: '', loading: true });
+    try {
+      const res = await api.post('/ai/explain-code', { code, language: language || 'text' });
+      setAiDrawer(s => ({ ...s, content: res.data.result ?? '', loading: false }));
+    } catch {
+      setAiDrawer(s => ({ ...s, content: 'AI açıklaması alınamadı.', loading: false }));
+    }
+  };
+
+  // Dictionary auto-link: builds a regex of all terms once
+  const termRegex = useMemo(() => {
+    if (dictTerms.length === 0) return null;
+    const sorted = [...dictTerms].sort((a, b) => b.term.length - a.term.length);
+    const escaped = sorted.map(t => t.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+  }, [dictTerms]);
+
+  const renderWithGlossary = (text: string): React.ReactNode => {
+    if (!termRegex || !text) return text;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+    termRegex.lastIndex = 0;
+    while ((match = termRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+      const term = dictTerms.find(t => t.term.toLowerCase() === match![0].toLowerCase());
+      if (term) {
+        parts.push(
+          <span
+            key={`${match.index}-${term.id}`}
+            className="underline decoration-dotted decoration-primary/60 cursor-help"
+            title={term.definition}
+          >
+            {match[0]}
+          </span>
+        );
+      } else {
+        parts.push(match[0]);
+      }
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+    return <>{parts}</>;
   };
 
   if (loading) {
@@ -182,7 +289,6 @@ export default function NoteEditorPage() {
         {/* Editor / Preview */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8">
-            {/* Title */}
             <input
               type="text"
               value={title}
@@ -191,7 +297,6 @@ export default function NoteEditorPage() {
               placeholder="Başlık..."
             />
 
-            {/* Tags row */}
             <div className="flex items-center gap-3 mb-8 flex-wrap">
               {note.category && (
                 <span className="text-xs bg-primary/10 text-primary border border-primary/20 rounded-md px-2 py-1">
@@ -208,25 +313,41 @@ export default function NoteEditorPage() {
               </span>
             </div>
 
-            {/* Content */}
             {isPreview ? (
               <div className="prose prose-invert prose-sm max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    code({ node, className, children, ...props }) {
+                    p: ({ children }) => <p>{React.Children.map(children, c => typeof c === 'string' ? renderWithGlossary(c) : c)}</p>,
+                    li: ({ children }) => <li>{React.Children.map(children, c => typeof c === 'string' ? renderWithGlossary(c) : c)}</li>,
+                    code({ className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || '');
-                      const isBlock = String(children).includes('\n');
-                      return match || isBlock ? (
-                        <SyntaxHighlighter
-                          style={vscDarkPlus as Record<string, React.CSSProperties>}
-                          language={match?.[1] ?? 'text'}
-                          PreTag="div"
-                          className="rounded-xl !text-sm"
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      ) : (
+                      const codeText = String(children).replace(/\n$/, '');
+                      const isBlock = codeText.includes('\n');
+                      if (match || isBlock) {
+                        const language = match?.[1] ?? 'text';
+                        return (
+                          <div className="relative group my-3">
+                            <button
+                              onClick={() => handleExplainCode(codeText, language)}
+                              className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-1 rounded-md bg-primary/20 hover:bg-primary/30 text-primary text-xs"
+                              title="AI'a sor"
+                            >
+                              <Sparkles className="w-3 h-3" />
+                              AI'a sor
+                            </button>
+                            <SyntaxHighlighter
+                              style={vscDarkPlus as Record<string, React.CSSProperties>}
+                              language={language}
+                              PreTag="div"
+                              className="rounded-xl !text-sm"
+                            >
+                              {codeText}
+                            </SyntaxHighlighter>
+                          </div>
+                        );
+                      }
+                      return (
                         <code className="bg-white/10 px-1.5 py-0.5 rounded text-primary text-sm" {...props}>
                           {children}
                         </code>
@@ -248,8 +369,8 @@ export default function NoteEditorPage() {
           </div>
         </div>
 
-        {/* Right sidebar: metadata */}
-        <aside className="w-64 shrink-0 border-l border-white/5 p-5 space-y-6 hidden lg:block overflow-y-auto">
+        {/* Right sidebar */}
+        <aside className="w-72 shrink-0 border-l border-white/5 p-5 space-y-6 hidden lg:block overflow-y-auto">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Kategori</label>
             <select
@@ -262,7 +383,18 @@ export default function NoteEditorPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Etiketler</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Etiketler</label>
+              <button
+                onClick={handleSuggestTags}
+                disabled={suggestingTags || !content.trim()}
+                className="flex items-center gap-1 text-xs text-primary hover:bg-primary/10 px-2 py-1 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title="AI ile etiket öner"
+              >
+                {suggestingTags ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                AI
+              </button>
+            </div>
             <input
               type="text"
               value={tags}
@@ -279,6 +411,27 @@ export default function NoteEditorPage() {
             )}
           </div>
 
+          {/* Same-day journal entries */}
+          {sameDayJournals.length > 0 && (
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2 flex items-center gap-1.5">
+                <BookMarked className="w-3 h-3" /> Aynı Gün Günlük
+              </label>
+              <div className="space-y-2">
+                {sameDayJournals.map(j => (
+                  <button
+                    key={j.id}
+                    onClick={() => router.push('/dashboard/journal')}
+                    className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                  >
+                    <p className="text-xs font-medium line-clamp-1 group-hover:text-primary transition-colors">{j.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{j.content}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Bilgiler</label>
             <div className="space-y-2 text-xs text-muted-foreground">
@@ -286,22 +439,55 @@ export default function NoteEditorPage() {
               {note.updatedAt && <p>Güncelleme: {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true, locale: tr })}</p>}
               <p>{content.split(/\s+/).filter(Boolean).length} kelime</p>
               <p>{content.length} karakter</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Markdown İpuçları</label>
-            <div className="space-y-1 text-xs text-muted-foreground font-mono">
-              <p># Başlık 1</p>
-              <p>## Başlık 2</p>
-              <p>**kalın** *italik*</p>
-              <p>```js kod```</p>
-              <p>- [ ] görev</p>
-              <p>| tablo | satır |</p>
+              {dictTerms.length > 0 && <p className="text-primary/70">📖 {dictTerms.length} sözlük terimi otomatik bağlanıyor</p>}
             </div>
           </div>
         </aside>
       </div>
+
+      {/* AI Drawer */}
+      <AnimatePresence>
+        {aiDrawer.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            onClick={() => setAiDrawer(s => ({ ...s, open: false }))}
+          >
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30 }}
+              onClick={e => e.stopPropagation()}
+              className="absolute right-0 top-0 h-full w-full max-w-md glass border-l border-white/10 p-6 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  {aiDrawer.title}
+                </h3>
+                <button
+                  onClick={() => setAiDrawer(s => ({ ...s, open: false }))}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {aiDrawer.loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{aiDrawer.content}</ReactMarkdown>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
