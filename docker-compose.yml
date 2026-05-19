@@ -22,10 +22,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=${POSTGRES_CONNECTION_STRING}
+      - ConnectionStrings__Redis=redis:6379
       - Jwt__SecretKey=${JWT_SECRET_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Jwt__ExpiresInMinutes=60
+      - AI__OpenAI__ApiKey=${OPENAI_API_KEY}
     depends_on:
       redis:
         condition: service_healthy

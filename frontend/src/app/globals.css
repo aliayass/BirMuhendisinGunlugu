@@ -1,4 +1,52 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* TipTap editor placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(148, 163, 184, 0.4);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Notion tarzı drag handle — 6 nokta ikonu, sadece hover'da görünür */
+.drag-handle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: grab;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='5' r='1'/><circle cx='9' cy='12' r='1'/><circle cx='9' cy='19' r='1'/><circle cx='15' cy='5' r='1'/><circle cx='15' cy='12' r='1'/><circle cx='15' cy='19' r='1'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
+}
+.drag-handle:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+/* Editör/blok üzerine gelince görünür yap */
+.ProseMirror:hover ~ .drag-handle,
+.drag-handle:hover,
+.drag-handle.is-visible {
+  opacity: 1;
+}
+/* Paket varsayılan olarak hover'da görünür kılar — bu sadece yedek */
+
+/* Tippy: slash menüsünü kendi tasarımımız sarmalasın */
+.tippy-box[data-theme~='bmg-slash'] {
+  background: transparent;
+  box-shadow: none;
+}
+.tippy-box[data-theme~='bmg-slash'] .tippy-content {
+  padding: 0;
+}
 
 @theme {
   --color-primary: #3b82f6;

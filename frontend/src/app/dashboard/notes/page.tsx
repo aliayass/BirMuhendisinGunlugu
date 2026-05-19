@@ -1,18 +1,14 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   FileText,
   Plus,
   Loader2,
-  X,
   Trash2,
   Clock,
   Pin,
-  Tag,
-  Search,
-  FolderOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
@@ -34,17 +30,9 @@ interface Note {
   category: string;
 }
 
-const CATEGORIES = ['Genel', 'Mimari', 'Algoritma', 'DevOps', 'Frontend', 'Backend', 'Veritabanı', 'Güvenlik'];
-
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newContent, setNewContent] = useState('');
-  const [newTags, setNewTags] = useState('');
-  const [newCategory, setNewCategory] = useState('Genel');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const { searchQuery } = useSearch();
   const router = useRouter();
@@ -61,31 +49,6 @@ export default function NotesPage() {
   }, []);
 
   useEffect(() => { fetchNotes(); }, [fetchNotes]);
-
-  const handleCreateNote = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const title = newTitle.trim();
-    const content = newContent.trim();
-    if (!title || !content) return;
-    setIsSubmitting(true);
-    try {
-      const res = await api.post('/notes', {
-        title,
-        content,
-        parentId: null,
-        tags: newTags.trim(),
-        category: newCategory,
-      });
-      toast.success('Not oluşturuldu!');
-      setIsModalOpen(false);
-      setNewTitle(''); setNewContent(''); setNewTags(''); setNewCategory('Genel');
-      router.push(`/dashboard/notes/${res.data.id}`);
-    } catch {
-      toast.error('Not oluşturulamadı.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleTogglePin = async (noteId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -145,7 +108,7 @@ export default function NotesPage() {
           </p>
         </div>
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => router.push('/dashboard/notes/new')}
           className="h-12 px-6 rounded-xl bg-primary hover:bg-primary-dark gap-2 shadow-lg shadow-primary/20"
         >
           <Plus className="w-5 h-5" /> Yeni Not
@@ -220,90 +183,6 @@ export default function NotesPage() {
         </div>
       )}
 
-      {/* Create Note Modal */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={e => { if (e.target === e.currentTarget) setIsModalOpen(false); }}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="glass border border-white/10 rounded-3xl p-6 w-full max-w-lg relative shadow-2xl"
-            >
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <h2 className="text-2xl font-bold mb-6">Yeni Not Oluştur</h2>
-
-              <form onSubmit={handleCreateNote} className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    required
-                    autoFocus
-                    value={newTitle}
-                    onChange={e => setNewTitle(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-lg font-medium"
-                    placeholder="Not başlığı..."
-                  />
-                </div>
-
-                <div>
-                  <textarea
-                    required
-                    rows={4}
-                    value={newContent}
-                    onChange={e => setNewContent(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors resize-none text-sm"
-                    placeholder="Kısa bir özet veya ilk içerik..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1.5 block">Kategori</label>
-                    <select
-                      value={newCategory}
-                      onChange={e => setNewCategory(e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 outline-none focus:border-primary transition-colors text-sm"
-                    >
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground mb-1.5 block">Etiketler (virgülle ayır)</label>
-                    <input
-                      type="text"
-                      value={newTags}
-                      onChange={e => setNewTags(e.target.value)}
-                      className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 outline-none focus:border-primary transition-colors text-sm"
-                      placeholder="react, api, design..."
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !newTitle.trim() || !newContent.trim()}
-                  className="w-full h-12 rounded-xl bg-primary hover:bg-primary-dark"
-                >
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Oluştur ve Düzenle →'}
-                </Button>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
